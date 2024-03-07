@@ -1,23 +1,27 @@
 package com.example.trackme
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Dao
 interface ExerciseDao {
 
     @Insert
-    suspend fun insertExercise(exercise: Exercise)
+    suspend fun insertExerciseRecord(exerciseRecord: ExerciseRecord)
+
+    @Insert
+    suspend fun insertRepRecord(repRecord: RepRecord)
 
     @Upsert
-    suspend fun updateWeights(weights: Weights)
+    suspend fun updateExercise(exercise: Exercise)
 
-    @Query("SELECT * FROM weights WHERE current=1")
-    fun getCurrentWeights(test:String): Weights
+    @Query("SELECT * FROM exercise WHERE name=:name")
+    fun getExercise(name:String):Exercise
 
+    @Query("SELECT MAX(id) FROM ExerciseRecord")
+    fun getExerciseId(): Int
+    @Query("SELECT MAX(sessionId) FROM exerciserecord")
+    fun getSessionId():Int
 }
