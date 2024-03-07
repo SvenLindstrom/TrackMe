@@ -45,8 +45,11 @@ class MainActivity : ComponentActivity() {
             TrackMeTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    val state by viewModel.state.collectAsState()
-                    GymScreen_Jake(state = state, onEvent = viewModel::onEvent)
+
+
+
+                    //val state by viewModel.state.collectAsState()
+                    //GymScreen_Jake(state = state, onEvent = viewModel::onEvent)
                 }
             }
         }

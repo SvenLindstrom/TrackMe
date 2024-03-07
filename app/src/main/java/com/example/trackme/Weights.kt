@@ -8,9 +8,9 @@ data class Weights (
     @PrimaryKey
     val current: Int = 1,
     var seassionNum: Int = 1,
-    var squat: Double = 50.0,
-    var benchPress: Double = 30.0,
-    var overHeadPress: Double = 25.0,
-    var rows: Double = 60.0,
-    var deadLift: Double = 90.0
+    var squat: Float = 50.0f,
+    var benchPress: Float = 30.0f,
+    var overHeadPress: Float = 25.0f,
+    var rows: Float = 60.0f,
+    var deadLift: Float = 90.0f
 )

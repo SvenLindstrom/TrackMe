@@ -1,5 +1,7 @@
 package com.example.trackme
 
+import android.view.contentcapture.ContentCaptureSessionId
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,61 +16,67 @@ class ExerciseViewModel(
     private val dao: ExerciseDao,
 
 ): ViewModel() {
+    private val _state = MutableStateFlow(ExerciseState())
+    val state = _state
 
-    val _weights = MutableLiveData<Weights>(Weights())
-    val weights: LiveData<Weights> = _weights
-
+    private val _exercise = MutableLiveData<Exercise>()
+    private val exercise: LiveData<Exercise> = _exercise
     private var exerciseList = exerciseList()
     private var exerciseNum = 0
     private var upWeight = true
-    private val _state = MutableStateFlow(ExerciseState())
-    val state = _state
     init {
         viewModelScope.launch {
-            val initialWeights = fetchInitialWeights()
-            _weights.value = initialWeights
-            exerciseList = exerciseList()
-            _state.update {it.copy(
-                name = numStrTranslator(exerciseList[exerciseNum]),
-                weight = getWeight(),
-                sessionId = weights.value!!.seassionNum,
-            )
+            val exerciseId = fetchExerciseID()
+            val sessionId = fetchSessionID()
+            exerciseList = exerciseList(sessionId = sessionId)
+            val initialExercise = fetchExercise(numStrTranslator(exerciseList[exerciseNum]))
+
+            _exercise.value = initialExercise
+            _state.update { it.copy(
+                    name = exercise.value!!.name,
+                    weight = exercise.value!!.weight,
+                    sessionId = sessionId,
+                    exerciseId = exerciseId
+                    )
+                }
             }
         }
-    }
+
     fun onEvent(event: ExerciseEvent){
         when(event){
             ExerciseEvent.FinishedExercise -> {
-                val sessionId = weights.value!!.seassionNum
+                var sessionId = state.value.sessionId
                 val name = state.value.name
                 val weight = state.value.weight
-                val exercise = Exercise(sessionId = sessionId, name = name, weight = weight)
+                val exerciseRecord = ExerciseRecord(sessionId = sessionId, name = name, weight = weight)
 
-                if (upWeight){ upDateWeight() }
+                if (upWeight){ upDateExerciseWeight() }
                 upWeight = true
 
                 if (exerciseNum == 2){
                     exerciseNum = 0
-                    _weights.value!!.seassionNum = _weights.value!!.seassionNum.plus(1)
+                    sessionId = sessionId.plus(1)
                     exerciseList = exerciseList()
                 }else{
                     exerciseNum++
                 }
 
                 viewModelScope.launch {
-                    dao.insertExercise(exercise)
-                    dao.updateWeights(weights.value!!)
+                    dao.insertExerciseRecord(exerciseRecord)
+                    dao.updateExercise(exercise.value!!)
+                    val nextExercise = fetchExercise(numStrTranslator(exerciseList[exerciseNum]))
+
+                    _state.update {
+                        it.copy(
+                            weight = nextExercise.weight,
+                            lastSet = false,
+                            set = 1,
+                            name = nextExercise.name,
+                            sessionId = sessionId,
+                            exerciseId = _state.value.exerciseId.inc()
+                        )
+                    }
                 }
-
-                _state.update { it.copy(
-                    weight = getWeight(),
-                    lastSet = false,
-                    set = 1,
-                    name = numStrTranslator(exerciseList[exerciseNum]),
-                    sessionId = _weights.value!!.seassionNum,
-
-                ) }
-
             }
             ExerciseEvent.FinishedSet -> {
                 var lastSet = false
@@ -78,12 +86,24 @@ class ExerciseViewModel(
                 if (state.value.set == 4){
                     lastSet = true
                 }
+
+                val repRecord = RepRecord(
+                    exerciseId = state.value.exerciseId,
+                    setNum = state.value.set,
+                    repNum = state.value.rep
+                )
+
+                viewModelScope.launch {
+                    dao.insertRepRecord(repRecord)
+                }
+
                 _state.update { it.copy(
                     set = state.value.set.inc(),
                     lastSet = lastSet,
                     rep = 5,
                     resting = true
-                ) }
+                    )
+                }
             }
 
             ExerciseEvent.DecRep -> {
@@ -101,58 +121,54 @@ class ExerciseViewModel(
                     newRep = state.value.rep.inc()
                 }
                 _state.update { it.copy(
-                    rep = newRep
-                ) }
+                        rep = newRep
+                    )
+                }
             }
 
             is ExerciseEvent.RepChange -> {
                 _state.update { it.copy(
-                    rep = event.n
-                ) }
+                        rep = event.n
+                    )
+                }
             }
 
             ExerciseEvent.NextExercise -> {
-                _state.update { it.copy(
-                    resting = false
-                ) }
+                    _state.update { it.copy(
+                        resting = false
+                    )
+                }
             }
         }
     }
 
-
-
-    fun getWeight(): Double{
-        val n = exerciseList[exerciseNum]
-        return when(n){
-            0 -> weights.value!!.squat
-            1 -> weights.value!!.benchPress
-            2 -> weights.value!!.rows
-            3 -> weights.value!!.overHeadPress
-            4 -> weights.value!!.deadLift
-            else -> {_weights.value!!.squat}
-        }
-
-
-    }
-
-    fun upDateWeight(){
-        val n = exerciseList[exerciseNum]
-         when(n){
-            0 -> _weights.value!!.squat = _weights.value!!.squat.plus(2.5)
-            1 -> _weights.value!!.benchPress = _weights.value!!.benchPress.plus(2.5)
-            2 -> _weights.value!!.rows = _weights.value!!.rows.plus(2.5)
-            3 -> _weights.value!!.overHeadPress = _weights.value!!.overHeadPress.plus(2.5)
-            4 -> _weights.value!!.deadLift = _weights.value!!.deadLift.plus(2.5)
-            else -> {_weights.value!!.squat}
+    private fun upDateExerciseWeight(){
+        viewModelScope.launch {
+            val newExercise = Exercise(
+                name = _exercise.value!!.name,
+                weight = _exercise.value!!.weight.plus(2.5f)
+            )
+            dao.updateExercise(newExercise)
         }
     }
 
-    private suspend fun fetchInitialWeights(): Weights {
-        return withContext(Dispatchers.IO) {
-            dao.getCurrentWeights()
+    private suspend fun fetchExercise(name:String):Exercise{
+        return withContext(Dispatchers.IO){
+            dao.getExercise(name)
         }
     }
 
+    private  suspend fun fetchExerciseID():Int{
+        return withContext(Dispatchers.IO){
+            dao.getExerciseId() + 1
+        }
+    }
+
+    private  suspend fun fetchSessionID():Int{
+        return withContext(Dispatchers.IO){
+            dao.getSessionId() + 1
+        }
+    }
 
     private fun numStrTranslator(n:Int): String{
         return when(n){
@@ -165,16 +181,13 @@ class ExerciseViewModel(
         }
     }
 
-
-    private fun exerciseList(): List<Int>{
-
-        val weightMap = if (_weights.value!!.seassionNum % 2 == 0){
-            listOf(0, 1, 2)
-        }else{
-            listOf(0, 3, 4)
+    private fun exerciseList(
+        sessionId: Int = state.value.sessionId
+    ): List<Int>{
+        return if (sessionId % 2 == 0){
+                listOf(0, 1, 2)
+            }else{
+                listOf(0, 3, 4)
+            }
         }
-        return weightMap
-    }
-
-
 }

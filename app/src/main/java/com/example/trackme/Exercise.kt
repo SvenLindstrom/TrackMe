@@ -5,10 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Exercise (
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val sessionId: Int,
+    @PrimaryKey(autoGenerate = false)
     val name: String,
-    val weight: Double,
+    val weight: Float
 )
-

@@ -117,11 +117,11 @@ fun GymScreen (
 
 
 
-fun formatWeight(double: Double):String{
-    return if((double % 1).toFloat() == 0.5f){
-        String.format("%.1f", double)
+fun formatWeight(float: Float):String{
+    return if((float % 1).toFloat() == 0.5f){
+        String.format("%.1f", float)
     }else{
-        String.format("%.0f", double)
+        String.format("%.0f", float)
     }
 }
 
