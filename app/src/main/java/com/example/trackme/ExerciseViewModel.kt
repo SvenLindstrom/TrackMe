@@ -33,11 +33,11 @@ class ExerciseViewModel(
 
             _exercise.value = initialExercise
             _state.update { it.copy(
-                    name = exercise.value!!.name,
-                    weight = exercise.value!!.weight,
-                    sessionId = sessionId,
-                    exerciseId = exerciseId
-                    )
+                sessionId = sessionId,
+                exerciseId = exerciseId,
+                name = initialExercise.name,
+                weight = initialExercise.weight
+            )
                 }
             }
         }

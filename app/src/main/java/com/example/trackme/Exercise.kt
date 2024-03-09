@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class Exercise (
     @PrimaryKey(autoGenerate = false)
-    val name: String,
-    val weight: Float
+    val name: String = "Squat",
+    val weight: Float = 50f
 )

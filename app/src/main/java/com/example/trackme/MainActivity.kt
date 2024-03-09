@@ -39,6 +39,8 @@ class MainActivity : ComponentActivity() {
         }
     )
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -48,30 +50,10 @@ class MainActivity : ComponentActivity() {
 
 
 
-                    //val state by viewModel.state.collectAsState()
-                    //GymScreen_Jake(state = state, onEvent = viewModel::onEvent)
+                    val state by viewModel.state.collectAsState()
+                    GymScreen_Jake(state = state, onEvent = viewModel::onEvent)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello $name!",
-            modifier = modifier
-    )
-    Button(onClick = { /*TODO*/ }) {
-        
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TrackMeTheme {
-        Greeting("Android")
     }
 }
