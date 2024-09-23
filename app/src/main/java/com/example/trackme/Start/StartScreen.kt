@@ -1,4 +1,4 @@
-package com.example.trackme
+package com.example.trackme.Start
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -18,7 +18,7 @@ import com.example.trackme.UiElements.CircularProgressBar
 
 
 @Composable
-fun start(navController: NavController){
+fun Start(navController: NavController){
     Box(modifier = Modifier, contentAlignment = Alignment.Center){
         CircularProgressBar(angle = 0f)
         Button(

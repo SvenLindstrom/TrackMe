@@ -1,5 +1,7 @@
 package com.example.trackme
 import android.annotation.SuppressLint
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,6 +12,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.trackme.Gym.ExerciseViewModel
+import com.example.trackme.Gym.GymScreen_Jake
+import com.example.trackme.Start.Start
+import com.example.trackme.end.EndViewModel
+import com.example.trackme.end.End
 
 
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -20,18 +27,18 @@ fun Nav (
 ){
 
     val navHost = rememberNavController()
-    println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTt")
-    //println(navHost.currentDestination)
 
 
     NavHost(
         navController = navHost,
         startDestination = "start",
-        modifier = Modifier
+        modifier = Modifier,
+        exitTransition = { ExitTransition.None},
+        //enterTransition = { EnterTransition.None}
     ){
         composable(route = "start"){
             println(navHost.currentDestination)
-            start(navController = navHost)
+            Start(navController = navHost)
         }
         composable(route = "session"){
             println(navHost.currentDestination)
@@ -48,9 +55,9 @@ fun Nav (
             val test = remember {
                 navHost.getBackStackEntry("end")
             }
-            val sessionViewModel: EndViewModel =  viewModel(viewModelStoreOwner = test, factory = endFactory)
-            val endState by sessionViewModel.state.collectAsState()
-            end(navController = navHost, state = endState)
+            val endViewModel: EndViewModel =  viewModel(viewModelStoreOwner = test, factory = endFactory)
+            val endState by endViewModel.state.collectAsState()
+            End(navController = navHost, onEvent = endViewModel::onEvent,  state = endState)
         }
     }
 }

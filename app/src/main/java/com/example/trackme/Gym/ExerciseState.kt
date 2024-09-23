@@ -1,9 +1,9 @@
-package com.example.trackme
+package com.example.trackme.Gym
 
 data class ExerciseState(
     val sessionId: Int = 1,
     val name: String = "Squat",
-    val weight: Float = 550f,
+    val weight: Float = 10f,
     val setNum: Int =  1,
     val repsCompleted: Int = 5,
     val resting: Boolean = false,

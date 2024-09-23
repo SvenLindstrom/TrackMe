@@ -3,21 +3,21 @@ package com.example.trackme.Database.Entitis
 import androidx.room.Entity
 import androidx.room.ForeignKey
 
-@Entity(primaryKeys = arrayOf("routineId", "exerciseId", "day"),
+@Entity(primaryKeys = arrayOf("routineId", "exerciseInstanceId", "day"),
     foreignKeys = arrayOf(
         ForeignKey(
             entity = Routine::class,
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("routineId")),
         ForeignKey(
-            entity = Exercise::class,
+            entity = ExerciseInstance::class,
             parentColumns = arrayOf("id"),
-            childColumns = arrayOf("exerciseId"))
+            childColumns = arrayOf("exerciseInstanceId"))
     )
 )
 data class ExerciseInRoutine (
     val routineId: Int,
-    val exerciseId: Int,
+    val exerciseInstanceId: Int,
     val day: Int,
     val exerciseOrder: Int
 )

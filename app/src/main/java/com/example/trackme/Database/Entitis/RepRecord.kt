@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity(foreignKeys = arrayOf(
     ForeignKey(entity = ExerciseRecord::class,
-        parentColumns = arrayOf("sessionId","exerciseId"),
-        childColumns = arrayOf("sessionId","exerciseId"),
+        parentColumns = arrayOf("sessionId","exerciseInstanceId"),
+        childColumns = arrayOf("sessionId","exerciseInstanceId"),
         onDelete = ForeignKey.CASCADE
     )
 ))
@@ -16,6 +16,6 @@ data class RepRecord (
     val id: Int = 0,
     val setNum: Int,
     val sessionId: Int,
-    val exerciseId: Int,
+    val exerciseInstanceId: Int,
     val repComp: Int
     )
