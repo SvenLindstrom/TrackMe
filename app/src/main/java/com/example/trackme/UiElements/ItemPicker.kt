@@ -1,4 +1,4 @@
-package com.example.trackme
+package com.example.trackme.UiElements
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
