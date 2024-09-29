@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //inserData(db.dao)
+        inserData(db.dao)
         setContent {
             TrackMeTheme {
                 // A surface container using the 'background' color from the theme
